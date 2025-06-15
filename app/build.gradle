@@ -1,9 +1,9 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 35
     useLibrary 'org.apache.http.legacy'
-
+    namespace "org.freshrss.easyrss"
     sourceSets {
         main {
             java {
@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId "org.freshrss.easyrss"
         minSdkVersion 7
-        targetSdkVersion 29
+        targetSdkVersion 35
         versionCode 706
         versionName '0.7.6'
     }
