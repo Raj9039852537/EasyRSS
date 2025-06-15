@@ -22,6 +22,7 @@
         <activity
             android:name="org.freshrss.easyrss.Home"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="true"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Normal"
             android:windowSoftInputMode="adjustResize" >
@@ -32,7 +33,8 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="org.freshrss.easyrss.SyncingReceiver" >
+        <receiver android:name="org.freshrss.easyrss.SyncingReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.net.ConnectivityManager.CONNECTIVITY_ACTION" />
             </intent-filter>
