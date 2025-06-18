@@ -31,6 +31,7 @@ import org.freshrss.easyrss.data.readersetting.SettingSyncInterval;
 import org.freshrss.easyrss.data.readersetting.SettingSyncMethod;
 import org.freshrss.easyrss.data.readersetting.SettingTheme;
 import org.freshrss.easyrss.data.readersetting.SettingVolumeKeySwitching;
+import org.freshrss.easyrss.network.url.AbsURL;
 import org.freshrss.easyrss.view.AbsViewCtrl;
 
 import android.annotation.SuppressLint;
@@ -42,11 +43,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -71,6 +75,7 @@ public class SettingsViewCtrl extends AbsViewCtrl implements OnSettingUpdatedLis
         showSettingMarkAllAsReadConfirmation();
         showSettingAboutEasyRSS();
         showSettingAboutAuthor();
+        showServerUrl();
         showSettingBrowserChoice();
 
         final View btnCal = view.findViewById(R.id.BtnCalculation);
@@ -200,7 +205,28 @@ public class SettingsViewCtrl extends AbsViewCtrl implements OnSettingUpdatedLis
             }
         });
     }
+    private void showServerUrl(){
+        final EditText SettingUrl = view.findViewById(R.id.TxtServerUrl);
+        SettingUrl.setText(dataMgr.getSettingByName(Setting.SETTING_SERVER_URL));
+        SettingUrl.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Respond to change
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Respond after text has changed
+                String serverUrl =((EditText) SettingsViewCtrl.this.view.findViewById(R.id.TxtServerUrl)).getText().toString();
+                AbsURL.setServerUrl(serverUrl);
+                Setting sUrl = new Setting(Setting.SETTING_SERVER_URL,serverUrl);
+                dataMgr.updateSetting(sUrl);
+            }
+        });
+    }
     private void showSettingAboutEasyRSS() {
         try {
             final PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
@@ -245,6 +271,7 @@ public class SettingsViewCtrl extends AbsViewCtrl implements OnSettingUpdatedLis
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void showSettingBrowserChoice() {
         final SettingBrowserChoice setting = new SettingBrowserChoice(dataMgr);
         final LinearLayout settingBrowserChoice = (LinearLayout) view.findViewById(R.id.SettingBrowserChoice);
@@ -413,6 +440,7 @@ public class SettingsViewCtrl extends AbsViewCtrl implements OnSettingUpdatedLis
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void showSettingImageFetching() {
         final ImageView img = (ImageView) view.findViewById(R.id.SettingImageFetchingStatus);
         final SettingImageFetching sFetch = new SettingImageFetching(dataMgr);
