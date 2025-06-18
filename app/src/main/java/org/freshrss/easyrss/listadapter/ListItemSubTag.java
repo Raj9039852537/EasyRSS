@@ -67,9 +67,7 @@ public class ListItemSubTag extends AbsListItem {
         txtTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, fontSize);
         txtTitle.setText(title);
         txtNumber.setTextSize(TypedValue.COMPLEX_UNIT_DIP, fontSize);
-        if (number >= 1000) {
-            txtNumber.setText("1000+");
-        } else if (number > 0) {
+        if (number > 0) {
             txtNumber.setText(String.valueOf(number));
             txtNumber.setVisibility(View.VISIBLE);
         } else {
