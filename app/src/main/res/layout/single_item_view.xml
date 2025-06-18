@@ -4,6 +4,7 @@
     style="?verticalScrollView"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:fitsSystemWindows="true"
     android:fadingEdge="vertical"
     android:fadingEdgeLength="4dip" >
 

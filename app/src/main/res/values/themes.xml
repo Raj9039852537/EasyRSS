@@ -4,6 +4,7 @@
     <style name="Theme.Normal" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:fadeScrollbars">true</item>
         <item name="android:windowBackground">@null</item>
+        <item name="android:windowFullscreen">true</item>
         <item name="textColor">@style/TextColorNormal</item>
         <item name="pageBackground">@style/BackgroundNormal</item>
         <item name="listItemBackground">@style/ListItemBackgroundNormal</item>
@@ -24,6 +25,7 @@
     <style name="Theme.Dark" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:fadeScrollbars">true</item>
         <item name="android:windowBackground">@null</item>
+        <item name="android:windowFullscreen">true</item>
         <item name="textColor">@style/TextColorDark</item>
         <item name="pageBackground">@style/BackgroundDark</item>
         <item name="listItemBackground">@style/ListItemBackgroundDark</item>

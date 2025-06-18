@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingBottom="10dip"
+    android:fitsSystemWindows="true"
     android:paddingLeft="14dip"
     android:paddingRight="10dip"
     android:paddingTop="10dip" >
