@@ -12,6 +12,7 @@
 package org.freshrss.easyrss;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import org.freshrss.easyrss.network.NetworkMgr;
 import org.freshrss.easyrss.network.NetworkUtils;
 import org.freshrss.easyrss.view.AbsViewCtrl;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
@@ -43,6 +45,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -57,8 +60,10 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.SearchView;  // Make sure to import this
 
 public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener {
+    final int fontSize = new SettingFontSize(dataMgr).getData();
     private class FeedListAdapterListener implements OnItemTouchListener {
         private float lastX;
         private float lastY;
@@ -118,6 +123,7 @@ public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener
         }
     }
 
+    @SuppressLint("HandlerLeak")
     final static private Handler handler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
@@ -231,6 +237,7 @@ public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener
     private ItemDataSyncer syncer;
     private final String uid;
     private final int viewType;
+    private SearchView searchView;
 
     public FeedViewCtrl(final DataMgr dataMgr, final Context context, final String uid, final int viewType) {
         super(dataMgr, R.layout.feed, context);
@@ -301,6 +308,7 @@ public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener
     public int getViewType() {
         return viewType;
     }
+    private List<Item> originalItemList = new LinkedList<>();  // Full unfiltered list
 
     @Override
     public void handleOnSyncFinished(final String syncerType, final boolean succeeded) {
@@ -325,7 +333,7 @@ public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener
                 final Uri uri = DataUtils.isTagUid(uid) ? Uri.withAppendedPath(Tag.CONTENT_URI,
                         "items/" + URLEncoder.encode(uid)) : Item.CONTENT_URI;
                 final Cursor cur = resolver.query(uri, null, condition, null, null);
-                final List<Item> items = new LinkedList<Item>();
+                final List<Item> items = originalItemList;
                 for (cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
                     items.add(Item.fromCursor(cur));
                 }
@@ -340,6 +348,52 @@ public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener
         thread.start();
     }
 
+    // Call this in your onCreateView/onCreate method
+    private void setupSearch() {
+        searchView = this.view.findViewById(R.id.search_view); // Or however your view is accessed
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    filterItems(query);
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    filterItems(newText);
+                    return true;
+                }
+            });
+        }
+    }
+
+    private void filterItems(String query) {
+        List<Item> filtered = new ArrayList<>();
+        for (Item item : originalItemList) {
+            if (item.getTitle().toLowerCase().contains(query.toLowerCase()) ||
+                    item.getContent().toLowerCase().contains(query.toLowerCase())) {
+                filtered.add(item);
+            }
+        }
+        updateAdapter(filtered);
+    }
+
+    private void updateAdapter(List<Item> items) {
+        List<AbsListItem> listItems = new ArrayList<>();
+        for (Item item : items) {
+            listItems.add(new ListItemItem(
+                    item.getUid(),                     // String id
+                    item.getTitle(),                 // String title
+                    item.getSourceTitle(),     // String subscriptionTitle
+                    item.getState().isRead(),                   // boolean isRead
+                    item.getState().isStarred(),                // boolean isStarred
+                    item.getTimestamp()              // long timestamp
+            ));
+        }
+        lstWrapper.getAdapter();  // Refresh list
+    }
+
     @Override
     public void onActivate() {
         this.isAvailable = true;
@@ -351,7 +405,7 @@ public class FeedViewCtrl extends AbsViewCtrl implements ItemListWrapperListener
         dataMgr.addOnItemUpdatedListener(lstWrapper);
 
         showItemList();
-
+        setupSearch();
         final View markAll = this.view.findViewById(R.id.BtnMarkAllAsRead);
         markAll.setOnClickListener(new OnClickListener() {
             @Override
